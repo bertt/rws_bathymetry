@@ -30,10 +30,9 @@ function toRD(latDeg, lonDeg) {
 const BATHY = [4.52, 52.455, 4.6, 52.485];
 const BATHY_CENTER = Cesium.Cartesian3.fromDegrees((BATHY[0] + BATHY[2]) / 2, (BATHY[1] + BATHY[3]) / 2, 0);
 const BATHY_ENU = Cesium.Transforms.eastNorthUpToFixedFrame(BATHY_CENTER);
-const BATHY_EAST = Cesium.Matrix4.getColumn(BATHY_ENU, 0, new Cesium.Cartesian4());
-const BATHY_NORTH = Cesium.Matrix4.getColumn(BATHY_ENU, 1, new Cesium.Cartesian4());
-const BATHY_EAST_V = new Cesium.Cartesian3(BATHY_EAST.x, BATHY_EAST.y, BATHY_EAST.z);
-const BATHY_NORTH_V = new Cesium.Cartesian3(BATHY_NORTH.x, BATHY_NORTH.y, BATHY_NORTH.z);
+const column = (i) => Cesium.Cartesian3.fromCartesian4(Cesium.Matrix4.getColumn(BATHY_ENU, i, new Cesium.Cartesian4()));
+const BATHY_EAST_V = column(0);
+const BATHY_NORTH_V = column(1);
 const BATHY_HALF_EAST = Cesium.Math.toRadians((BATHY[2] - BATHY[0]) / 2) * 6378137 * Math.cos(Cesium.Math.toRadians((BATHY[1] + BATHY[3]) / 2));
 const BATHY_HALF_NORTH = Cesium.Math.toRadians((BATHY[3] - BATHY[1]) / 2) * 6335439;
 
@@ -57,6 +56,8 @@ const globeMaterial = new Cesium.Material({
         // Outside the bathymetry extent leave the basemap untouched.
         vec3 d = (czm_inverseView * vec4(-materialInput.positionToEyeEC, 1.0)).xyz - bCenter;
         if (abs(dot(d, bEast)) > halfEast || abs(dot(d, bNorth)) > halfNorth) { m.alpha = 0.0; return m; }
+        // Ellipsoid height ~0 (nap = -offset) means no survey data: show the basemap there too.
+        if (nap < -30.0) { m.alpha = 0.0; return m; }
         if (nap < 0.0 && rampOn > 0.5) {
           color = rampColor(-nap);
           alpha = 0.85;
@@ -115,10 +116,9 @@ const globeMaterial = new Cesium.Material({
     return;
   }
   const combined = new CompositeTerrainProvider(pdok, bathy, { fallbackHeight: GEOID_OFFSET });
-  // Bathymetry only: flat ellipsoid as base so tiles outside the survey area still render (masked in the shader).
-  const flat = new Cesium.EllipsoidTerrainProvider({ tilingScheme: pdok.tilingScheme });
-  const bathyOnly = new CompositeTerrainProvider(flat, bathy, { fallbackHeight: GEOID_OFFSET });
-  const providers = { combined, pdok, bathy: bathyOnly };
+  // Bathymetry-only tiles don't cover the globe (black outside the survey), so keep PDOK as a base layer;
+  // the shader only colours the survey extent.
+  const providers = { combined, pdok, bathy: combined };
   const setMode = (m) => { viewer.scene.terrainProvider = providers[m]; };
   setMode("bathy");
   status.textContent = "Heights are WGS84 ellipsoid heights; colours/contours are relative to NAP.";
