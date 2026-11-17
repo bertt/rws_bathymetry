@@ -3,9 +3,15 @@
 const GEOID_OFFSET = 42.5;
 const PDOK = "https://api.pdok.nl/kadaster/3d-basisvoorziening/ogc/v1/collections/digitaalterreinmodel/quantized-mesh";
 
-const RAMP_STOPS = [
-  [0, "#c9f2f7"], [-2, "#6fd0e8"], [-5, "#2f94d6"], [-10, "#1d5fb5"], [-15, "#2a3a99"], [-25, "#1a1050"],
-];
+// Depth (m below NAP) of the six colour stops; the selected ramp supplies one colour per stop.
+const RAMP_DEPTHS = [0, 2, 5, 10, 15, 25];
+const RAMPS = {
+  "Blues": ["#c9f2f7", "#6fd0e8", "#2f94d6", "#1d5fb5", "#2a3a99", "#1a1050"],
+  "Viridis": ["#fde725", "#7ad151", "#22a884", "#2a788e", "#414487", "#440154"],
+  "Turbo (rainbow)": ["#a4fc3c", "#e2dc38", "#fe9b2d", "#e1480b", "#8a1d9a", "#30123b"],
+  "Nautical (shallow = warm)": ["#f2e6b1", "#f2b36b", "#6fb98f", "#3b8fb5", "#2a5a9a", "#16264d"],
+  "Grayscale": ["#f2f2f2", "#cfcfcf", "#a0a0a0", "#707070", "#404040", "#101010"],
+};
 
 const status = document.getElementById("status");
 
@@ -22,20 +28,15 @@ function toRD(latDeg, lonDeg) {
 
 const globeMaterial = new Cesium.Material({
   fabric: {
-    uniforms: { offset: GEOID_OFFSET, spacing: 1.0, rampOn: 1.0, contourOn: 1.0 },
+    uniforms: { offset: GEOID_OFFSET, spacing: 1.0, rampOn: 1.0, contourOn: 1.0,
+      c0: Cesium.Color.WHITE, c1: Cesium.Color.WHITE, c2: Cesium.Color.WHITE, c3: Cesium.Color.WHITE, c4: Cesium.Color.WHITE, c5: Cesium.Color.WHITE },
     source: `
       vec3 rampColor(float d) { // d = depth below NAP, metres
-        vec3 c0 = vec3(0.79, 0.95, 0.97);
-        vec3 c1 = vec3(0.44, 0.82, 0.91);
-        vec3 c2 = vec3(0.18, 0.58, 0.84);
-        vec3 c3 = vec3(0.11, 0.37, 0.71);
-        vec3 c4 = vec3(0.16, 0.23, 0.60);
-        vec3 c5 = vec3(0.10, 0.06, 0.31);
-        if (d < 2.0) return mix(c0, c1, d / 2.0);
-        if (d < 5.0) return mix(c1, c2, (d - 2.0) / 3.0);
-        if (d < 10.0) return mix(c2, c3, (d - 5.0) / 5.0);
-        if (d < 15.0) return mix(c3, c4, (d - 10.0) / 5.0);
-        return mix(c4, c5, clamp((d - 15.0) / 10.0, 0.0, 1.0));
+        if (d < 2.0) return mix(c0.rgb, c1.rgb, d / 2.0);
+        if (d < 5.0) return mix(c1.rgb, c2.rgb, (d - 2.0) / 3.0);
+        if (d < 10.0) return mix(c2.rgb, c3.rgb, (d - 5.0) / 5.0);
+        if (d < 15.0) return mix(c3.rgb, c4.rgb, (d - 10.0) / 5.0);
+        return mix(c4.rgb, c5.rgb, clamp((d - 15.0) / 10.0, 0.0, 1.0));
       }
       czm_material czm_getMaterial(czm_materialInput materialInput) {
         czm_material m = czm_getDefaultMaterial(materialInput);
@@ -112,10 +113,19 @@ const globeMaterial = new Cesium.Material({
     document.getElementById("exagVal").textContent = exag.value + "×";
   };
 
-  const grad = RAMP_STOPS.map(([d, c]) => `${c} ${(-d / 25) * 100}%`).join(",");
-  document.getElementById("legend").innerHTML =
-    `<div class="bar" style="background:linear-gradient(to right,${grad})"></div>` +
-    `<div class="ticks"><span>0 m NAP</span><span>−10</span><span>−25 m</span></div>`;
+  const legend = document.getElementById("legend");
+  const rampSelect = document.getElementById("rampSelect");
+  Object.keys(RAMPS).forEach((name) => rampSelect.add(new Option(name, name)));
+  const setRamp = () => {
+    const colors = RAMPS[rampSelect.value];
+    colors.forEach((c, i) => (u["c" + i] = Cesium.Color.fromCssColorString(c)));
+    const grad = colors.map((c, i) => `${c} ${(RAMP_DEPTHS[i] / 25) * 100}%`).join(",");
+    legend.innerHTML =
+      `<div class="bar" style="background:linear-gradient(to right,${grad})"></div>` +
+      `<div class="ticks"><span>0 m NAP</span><span>−10</span><span>−25 m</span></div>`;
+  };
+  rampSelect.onchange = setRamp;
+  setRamp();
 
   const info = document.getElementById("info");
   const marker = viewer.entities.add({
