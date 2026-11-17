@@ -78,6 +78,9 @@ Footprint cells (`--cell` pixels square, default 32) with valid pixels are merge
 connected area. Properties: `source`, `resolution_m`, `valid_cells` (valid raster cells in the polygon), `area_m2`,
 `footprint_cell_m`, `footprint_cells`. A smaller `--cell` follows the survey outline more closely but gives larger output.
 
+Viewer (MapLibre, OpenFreeMap Positron basemap, click a polygon for its attributes):
+<https://bertt.github.io/rws_bathymetry/coverage/> (source in `docs/coverage/`; copy a new `coverage.geojson` there to update it).
+
 ### 2. Tile
 
 ```

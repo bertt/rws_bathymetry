@@ -1,0 +1,63 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <title>RWS bathymetry – data coverage</title>
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <link href="https://unpkg.com/maplibre-gl@5/dist/maplibre-gl.css" rel="stylesheet">
+  <script src="https://unpkg.com/maplibre-gl@5/dist/maplibre-gl.js"></script>
+  <style>
+    html, body, #map { width: 100%; height: 100%; margin: 0; font-family: sans-serif; }
+    #title { position: absolute; top: 10px; left: 10px; background: rgba(255, 255, 255, 0.92); padding: 6px 10px; border-radius: 4px; font-size: 13px; box-shadow: 0 1px 4px rgba(0, 0, 0, 0.3); }
+    #title b { font-size: 14px; }
+    .maplibregl-popup-content table { border-collapse: collapse; font-size: 12px; }
+    .maplibregl-popup-content td { padding: 2px 8px 2px 0; }
+    .maplibregl-popup-content td:first-child { color: #555; }
+  </style>
+</head>
+<body>
+  <div id="map"></div>
+  <div id="title"><b>RWS bathymetry coverage</b><br>Areas with data in the 1 m GeoTIFFs. Click an area for its attributes.</div>
+  <script>
+    const map = new maplibregl.Map({
+      container: "map",
+      style: "https://tiles.openfreemap.org/styles/positron",
+      center: [5.3, 52.2],
+      zoom: 7,
+    });
+    map.addControl(new maplibregl.NavigationControl(), "top-right");
+    map.addControl(new maplibregl.ScaleControl());
+
+    const num = (v) => Number(v).toLocaleString("en");
+    const formats = {
+      resolution_m: (v) => `${v} m`,
+      area_m2: (v) => `${num(v)} m² (${(v / 1e6).toFixed(2)} km²)`,
+      footprint_cell_m: (v) => `${v} m`,
+      valid_cells: num,
+      footprint_cells: num,
+    };
+
+    map.on("load", async () => {
+      const data = await (await fetch("coverage.geojson")).json();
+      map.addSource("coverage", { type: "geojson", data });
+      map.addLayer({ id: "coverage-fill", type: "fill", source: "coverage",
+        paint: { "fill-color": "#e8590c", "fill-opacity": 0.55 } });
+      map.addLayer({ id: "coverage-line", type: "line", source: "coverage",
+        paint: { "line-color": "#c92a2a", "line-width": 1.5 } });
+
+      const bounds = new maplibregl.LngLatBounds();
+      const extend = (c) => (typeof c[0] === "number" ? bounds.extend(c) : c.forEach(extend));
+      data.features.forEach((f) => extend(f.geometry.coordinates));
+      if (!bounds.isEmpty()) map.fitBounds(bounds, { padding: 60, duration: 0 });
+
+      map.on("click", "coverage-fill", (e) => {
+        const rows = Object.entries(e.features[0].properties)
+          .map(([k, v]) => `<tr><td>${k}</td><td>${(formats[k] || String)(v)}</td></tr>`).join("");
+        new maplibregl.Popup().setLngLat(e.lngLat).setHTML(`<table>${rows}</table>`).addTo(map);
+      });
+      map.on("mouseenter", "coverage-fill", () => (map.getCanvas().style.cursor = "pointer"));
+      map.on("mouseleave", "coverage-fill", () => (map.getCanvas().style.cursor = ""));
+    });
+  </script>
+</body>
+</html>
