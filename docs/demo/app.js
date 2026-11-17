@@ -126,7 +126,7 @@ const globeMaterial = new Cesium.Material({
     const lon = Cesium.Math.toDegrees(c.longitude), lat = Cesium.Math.toDegrees(c.latitude);
     const [rx, ry] = toRD(lat, lon);
     info.innerHTML = `${depth}<br>` +
-      `${lon.toFixed(5)}°E, ${lat.toFixed(5)}°N<br>RD (EPSG:28992): X ${rx.toFixed(1)}, Y ${ry.toFixed(1)}`;
+      `RD (EPSG:28992): X ${rx.toFixed(1)}, Y ${ry.toFixed(1)}`;
     marker.pos = pos;
     marker.show = true;
   }, Cesium.ScreenSpaceEventType.LEFT_CLICK);
