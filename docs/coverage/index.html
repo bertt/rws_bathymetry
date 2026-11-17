@@ -40,15 +40,6 @@
     map.on("load", async () => {
       const data = await (await fetch("coverage.geojson")).json();
       map.addSource("coverage", { type: "geojson", data, tolerance: 0 });
-      // Survey channels are only tens of metres wide, so zoomed out they collapse to nothing:
-      // also show one marker per area at its bounding-box centre.
-      const centres = { type: "FeatureCollection", features: data.features.map((f) => {
-        const b = new maplibregl.LngLatBounds();
-        const ext = (c) => (typeof c[0] === "number" ? b.extend(c) : c.forEach(ext));
-        ext(f.geometry.coordinates);
-        return { type: "Feature", properties: f.properties, geometry: { type: "Point", coordinates: b.getCenter().toArray() } };
-      }) };
-      map.addSource("centres", { type: "geojson", data: centres });
       map.addLayer({ id: "coverage-fill", type: "fill", source: "coverage",
         paint: { "fill-color": "#e8590c", "fill-opacity": 0.75 } });
       // Thin survey channels are invisible when zoomed out, so draw a wide halo and a solid outline on top.
@@ -59,9 +50,6 @@
       map.moveLayer("coverage-fill", "coverage-line");
       map.addLayer({ id: "coverage-hover", type: "line", source: "coverage", filter: ["==", "source", ""],
         paint: { "line-color": "#1c7ed6", "line-width": 5 } });
-      map.addLayer({ id: "coverage-centres", type: "circle", source: "centres", maxzoom: 12,
-        paint: { "circle-color": "#e8590c", "circle-radius": ["interpolate", ["linear"], ["zoom"], 5, 4, 11, 7],
-          "circle-stroke-color": "#a61e1e", "circle-stroke-width": 1.5, "circle-opacity": 0.85 } });
 
       const bounds = new maplibregl.LngLatBounds();
       const extend = (c) => (typeof c[0] === "number" ? bounds.extend(c) : c.forEach(extend));
@@ -69,7 +57,7 @@
       if (!bounds.isEmpty()) map.fitBounds(bounds, { padding: 60, duration: 0 });
 
       // Query a small box around the pointer so thin features are easy to hit.
-      const layers = ["coverage-fill", "coverage-halo", "coverage-centres"];
+      const layers = ["coverage-fill", "coverage-halo"];
       const hit = (point) => map.queryRenderedFeatures([[point.x - 6, point.y - 6], [point.x + 6, point.y + 6]], { layers });
       map.on("click", (e) => {
         const f = hit(e.point)[0];
