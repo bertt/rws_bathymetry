@@ -39,7 +39,7 @@
 
     map.on("load", async () => {
       const data = await (await fetch("coverage.geojson")).json();
-      map.addSource("coverage", { type: "geojson", data, tolerance: 0 });
+      map.addSource("coverage", { type: "geojson", data, tolerance: 2 });
       map.addLayer({ id: "coverage-fill", type: "fill", source: "coverage",
         paint: { "fill-color": "#e8590c", "fill-opacity": 0.75 } });
       // Thin survey channels are invisible when zoomed out, so draw a wide halo and a solid outline on top.
