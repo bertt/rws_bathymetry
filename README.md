@@ -59,7 +59,7 @@ Build: `cargo build --release` → `target/release/bathy`.
 ```
 bathy download --list                 # list the NAP GeoTIFFs
 bathy download                        # download all (resumable) to data/raw and register them in data/sources.toml
-bathy download --only ON_oost         # only matching areas
+bathy download --url https://downloads.rijkswaterstaatdata.nl/bodemhoogte_1mtr/   # --url is optional; this is the default
 bathy fetch-grids                     # NLGEO2018 + RDNAPTRANS2018 grids (data/grids), needed for the height conversion
 ```
 

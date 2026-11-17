@@ -21,7 +21,7 @@ struct Cli {
 enum Cmd {
     /// Download the 1 m bathymetry GeoTIFFs (NAP variant) and register them in sources.toml.
     Download {
-        #[arg(long, default_value = download::DEFAULT_BASE)]
+        #[arg(long = "url", alias = "base", default_value = download::DEFAULT_BASE, help = "URL of the directory listing with the GeoTIFFs")]
         base: String,
         #[arg(long, default_value = "data/raw")]
         out: PathBuf,
@@ -44,7 +44,7 @@ enum Cmd {
     },
     /// Download all GeoTIFFs, then write GeoJSON polygons of the areas that contain data.
     Coverage {
-        #[arg(long, default_value = download::DEFAULT_BASE)]
+        #[arg(long = "url", alias = "base", default_value = download::DEFAULT_BASE, help = "URL of the directory listing with the GeoTIFFs")]
         base: String,
         #[arg(long, default_value = "data/raw")]
         raw: PathBuf,
