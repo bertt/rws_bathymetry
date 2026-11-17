@@ -16,3 +16,93 @@ name = "ZN_west_NAP"
 path = "raw/ZN_west_NAP.tif"
 crs = "EPSG:7415"
 priority = 0
+
+[[source]]
+name = "MN_noord_NAP"
+path = "raw/MN_noord_NAP.tif"
+crs = "EPSG:7415"
+priority = 0
+
+[[source]]
+name = "MN_zuid_NAP"
+path = "raw/MN_zuid_NAP.tif"
+crs = "EPSG:7415"
+priority = 0
+
+[[source]]
+name = "NN_lemmer_delfzijl_NAP"
+path = "raw/NN_lemmer_delfzijl_NAP.tif"
+crs = "EPSG:7415"
+priority = 0
+
+[[source]]
+name = "NN_waddenzee_NAP"
+path = "raw/NN_waddenzee_NAP.tif"
+crs = "EPSG:7415"
+priority = 0
+
+[[source]]
+name = "ON_noord_NAP"
+path = "raw/ON_noord_NAP.tif"
+crs = "EPSG:7415"
+priority = 0
+
+[[source]]
+name = "ON_zuid_NAP"
+path = "raw/ON_zuid_NAP.tif"
+crs = "EPSG:7415"
+priority = 0
+
+[[source]]
+name = "WNZ_noord_NAP"
+path = "raw/WNZ_noord_NAP.tif"
+crs = "EPSG:7415"
+priority = 0
+
+[[source]]
+name = "WNZ_zuid_NAP"
+path = "raw/WNZ_zuid_NAP.tif"
+crs = "EPSG:7415"
+priority = 0
+
+[[source]]
+name = "ZD_noord_NAP"
+path = "raw/ZD_noord_NAP.tif"
+crs = "EPSG:7415"
+priority = 0
+
+[[source]]
+name = "ZD_noordzee_midden_NAP"
+path = "raw/ZD_noordzee_midden_NAP.tif"
+crs = "EPSG:7415"
+priority = 0
+
+[[source]]
+name = "ZD_noordzee_noord_NAP"
+path = "raw/ZD_noordzee_noord_NAP.tif"
+crs = "EPSG:7415"
+priority = 0
+
+[[source]]
+name = "ZD_noordzee_zuid_NAP"
+path = "raw/ZD_noordzee_zuid_NAP.tif"
+crs = "EPSG:7415"
+priority = 0
+
+[[source]]
+name = "ZD_zuid_NAP"
+path = "raw/ZD_zuid_NAP.tif"
+crs = "EPSG:7415"
+priority = 0
+
+[[source]]
+name = "ZN_midden_NAP"
+path = "raw/ZN_midden_NAP.tif"
+crs = "EPSG:7415"
+priority = 0
+
+[[source]]
+name = "ZN_zuid_oost_NAP"
+path = "raw/ZN_zuid_oost_NAP.tif"
+crs = "EPSG:7415"
+priority = 0
