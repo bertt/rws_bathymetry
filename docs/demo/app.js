@@ -104,6 +104,14 @@ const globeMaterial = new Cesium.Material({
   const setAlpha = () => (viewer.imageryLayers.get(0).alpha = parseFloat(alpha.value));
   alpha.oninput = setAlpha; setAlpha();
 
+  // Exaggerate relative to NAP 0 so the water level stays put and the seabed gets deeper.
+  viewer.scene.verticalExaggerationRelativeHeight = GEOID_OFFSET;
+  const exag = document.getElementById("exag");
+  exag.oninput = () => {
+    viewer.scene.verticalExaggeration = parseFloat(exag.value);
+    document.getElementById("exagVal").textContent = exag.value + "×";
+  };
+
   const grad = RAMP_STOPS.map(([d, c]) => `${c} ${(-d / 25) * 100}%`).join(",");
   document.getElementById("legend").innerHTML =
     `<div class="bar" style="background:linear-gradient(to right,${grad})"></div>` +
