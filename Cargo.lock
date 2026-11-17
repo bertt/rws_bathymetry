@@ -117,6 +117,7 @@ dependencies = [
  "clap",
  "rayon",
  "serde_json",
+ "terrio",
  "ureq",
 ]
 
@@ -125,6 +126,7 @@ name = "bathy-core"
 version = "0.1.0"
 dependencies = [
  "anyhow",
+ "rayon",
  "serde",
  "terrio",
  "toml",

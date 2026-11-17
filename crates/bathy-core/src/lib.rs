@@ -1,3 +1,4 @@
+pub mod coverage;
 pub mod sampler;
 pub mod source;
 pub mod tiling;

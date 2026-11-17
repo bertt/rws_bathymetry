@@ -42,6 +42,29 @@ enum Cmd {
         #[arg(long, default_value = "data/grids")]
         out: PathBuf,
     },
+    /// Download all GeoTIFFs, then write GeoJSON polygons of the areas that contain data.
+    Coverage {
+        #[arg(long, default_value = download::DEFAULT_BASE)]
+        base: String,
+        #[arg(long, default_value = "data/raw")]
+        raw: PathBuf,
+        #[arg(long, default_value = "_NAP.tif")]
+        suffix: String,
+        #[arg(long)]
+        only: Vec<String>,
+        #[arg(long, default_value = "data/sources.toml")]
+        registry: PathBuf,
+        /// Use the files already registered in the registry; do not download.
+        #[arg(long)]
+        skip_download: bool,
+        /// Footprint cell size in pixels (e.g. 32 = 32 x 32 m cells for 1 m data). Smaller is more detailed.
+        #[arg(long, default_value_t = 32)]
+        cell: usize,
+        #[arg(long, default_value = "data/coverage.geojson")]
+        out: PathBuf,
+        #[arg(long, default_value = "data/grids")]
+        grids: PathBuf,
+    },
     /// Create terrain tiles from the registered sources.
     Tile {
         #[arg(long, default_value = "data/sources.toml")]
@@ -91,6 +114,12 @@ fn main() -> Result<()> {
                 download::download_file(&format!("https://cdn.proj.org/{g}"), &out.join(g))?;
             }
             Ok(())
+        }
+        Cmd::Coverage { base, raw, suffix, only, registry, skip_download, cell, out, grids } => {
+            if !skip_download {
+                run_download(&base, &raw, &suffix, &only, &registry, false)?;
+            }
+            run_coverage(&registry, &only, cell, &out, &grids)
         }
         Cmd::Tile { sources, out, format, max_zoom, grid, bbox, gzip, grids, datum } => match format {
             Format::QuantizedMesh => run_tile(&sources, &out, max_zoom, grid, bbox, gzip, &grids),
@@ -165,6 +194,63 @@ fn run_terrarium(sources: &Path, out: &Path, max_zoom: u32, bbox: Option<Vec<f64
     let tj = bathy_terrarium::tilejson("RWS bathymetry", "Rijkswaterstaat, Landelijke Opslag Lodingen (CC0)", (bounds.west, bounds.south, bounds.east, bounds.north), 0, top, datum_name);
     fs::write(out.join("tiles.json"), serde_json::to_string_pretty(&tj)?)?;
     println!("wrote {written_total} tiles + tiles.json to {}", out.display());
+    Ok(())
+}
+
+fn run_coverage(registry: &Path, only: &[String], cell: usize, out: &Path, grids: &Path) -> Result<()> {
+    use terrio::crs::{SpatialRef, Transformer};
+    if cell == 0 {
+        bail!("--cell must be at least 1");
+    }
+    bathy_core::vertical::set_grid_dir(grids);
+    let to_wgs84 = Transformer::new(&SpatialRef::parse("EPSG:28992")?, &SpatialRef::parse("EPSG:4326")?)?;
+    let round = |v: f64| (v * 1e7).round() / 1e7;
+    let mut features = Vec::new();
+    for cfg in load_registry(registry)?.iter().filter(|c| only.is_empty() || only.iter().any(|o| c.name.contains(o.as_str()))) {
+        let src = Source::open(cfg)?;
+        let comps = bathy_core::coverage::footprint(&src, cell)?;
+        let res = src.pixel_size;
+        println!("{}: {} areas, {} valid cells", src.name, comps.len(), comps.iter().map(|c| c.valid_cells).sum::<u64>());
+        for c in comps {
+            let mut polys = Vec::new();
+            for poly in &c.polygons {
+                let mut rings = Vec::new();
+                for ring in poly {
+                    let mut coords = Vec::with_capacity(ring.len() + 1);
+                    for &(x, y) in ring {
+                        let (lon, lat) = to_wgs84.transform(x, y)?;
+                        coords.push(serde_json::json!([round(lon), round(lat)]));
+                    }
+                    coords.push(coords[0].clone());
+                    rings.push(coords);
+                }
+                polys.push(rings);
+            }
+            let geometry = if polys.len() == 1 {
+                serde_json::json!({ "type": "Polygon", "coordinates": polys[0] })
+            } else {
+                serde_json::json!({ "type": "MultiPolygon", "coordinates": polys })
+            };
+            features.push(serde_json::json!({
+                "type": "Feature",
+                "geometry": geometry,
+                "properties": {
+                    "source": src.name,
+                    "resolution_m": res,
+                    "valid_cells": c.valid_cells,
+                    "area_m2": c.valid_cells as f64 * res * res,
+                    "footprint_cell_m": cell as f64 * res,
+                    "footprint_cells": c.footprint_cells,
+                }
+            }));
+        }
+    }
+    let fc = serde_json::json!({ "type": "FeatureCollection", "features": features });
+    if let Some(dir) = out.parent() {
+        fs::create_dir_all(dir)?;
+    }
+    fs::write(out, serde_json::to_string(&fc)?)?;
+    println!("wrote {} features to {}", fc["features"].as_array().map_or(0, Vec::len), out.display());
     Ok(())
 }
 

@@ -65,6 +65,18 @@ bathy fetch-grids                     # NLGEO2018 + RDNAPTRANS2018 grids (data/g
 
 Downloads resume with HTTP Range requests and skip files that are already complete.
 
+### Data coverage polygons
+
+```
+bathy coverage                        # download all GeoTIFFs, then write data/coverage.geojson
+bathy coverage --skip-download --cell 16 --out coverage.geojson
+```
+
+Scans every registered GeoTIFF at full resolution and writes GeoJSON (WGS84) polygons around the areas that contain data.
+Footprint cells (`--cell` pixels square, default 32) with valid pixels are merged into polygons with holes, one feature per
+connected area. Properties: `source`, `resolution_m`, `valid_cells` (valid raster cells in the polygon), `area_m2`,
+`footprint_cell_m`, `footprint_cells`. A smaller `--cell` follows the survey outline more closely but gives larger output.
+
 ### 2. Tile
 
 ```
