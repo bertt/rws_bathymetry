@@ -42,14 +42,15 @@
 
     map.on("load", async () => {
       const data = await (await fetch("coverage.geojson")).json();
-      map.addSource("coverage", { type: "geojson", data, tolerance: 2 });
+      map.addSource("coverage", { type: "geojson", data, tolerance: 0.3 });
       // One distinct colour per GeoTIFF (golden-angle hues stay distinguishable for any number of sources).
       const names = [...new Set(data.features.map((f) => f.properties.source))].sort();
       const colours = names.map((_, i) => `hsl(${Math.round((i * 137.508) % 360)}, 75%, ${i % 2 ? 42 : 52}%)`);
       const byName = (fallback) => ["match", ["get", "source"], ...names.flatMap((n, i) => [n, colours[i]]), fallback];
       const legend = document.getElementById("legend");
       legend.innerHTML = names.map((n, i) => `<div><span style="background:${colours[i]}"></span>${n}</div>`).join("");
-      map.addLayer({ id: "coverage-fill", type: "fill", source: "coverage",
+      // Fill only when zoomed in: simplified thin strips triangulate badly at low zoom; the outlines carry the overview.
+      map.addLayer({ id: "coverage-fill", type: "fill", source: "coverage", minzoom: 10,
         paint: { "fill-color": byName("#e8590c"), "fill-opacity": 0.75 } });
       // Thin survey channels are invisible when zoomed out, so draw a wide halo and a solid outline on top.
       map.addLayer({ id: "coverage-halo", type: "line", source: "coverage",

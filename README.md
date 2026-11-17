@@ -78,6 +78,13 @@ Footprint cells (`--cell` pixels square, default 32) with valid pixels are merge
 connected area. Properties: `source`, `resolution_m`, `valid_cells` (valid raster cells in the polygon), `area_m2`,
 `footprint_cell_m`, `footprint_cells`. A smaller `--cell` follows the survey outline more closely but gives larger output.
 
+Rings of diagonally touching cells can touch themselves at a vertex, which is invalid under OGC rules and can render as
+huge wrong areas. Repair the output before publishing it:
+
+```
+uv run --with shapely python scripts/sanitize_coverage.py data/coverage.geojson
+```
+
 Viewer (MapLibre, OpenFreeMap Positron basemap, click a polygon for its attributes):
 <https://bertt.github.io/rws_bathymetry/coverage/> (source in `docs/coverage/`; copy a new `coverage.geojson` there to update it).
 
