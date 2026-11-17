@@ -41,22 +41,36 @@
       const data = await (await fetch("coverage.geojson")).json();
       map.addSource("coverage", { type: "geojson", data });
       map.addLayer({ id: "coverage-fill", type: "fill", source: "coverage",
-        paint: { "fill-color": "#e8590c", "fill-opacity": 0.55 } });
+        paint: { "fill-color": "#e8590c", "fill-opacity": 0.75 } });
+      // Thin survey channels are invisible when zoomed out, so draw a wide halo and a solid outline on top.
+      map.addLayer({ id: "coverage-halo", type: "line", source: "coverage",
+        paint: { "line-color": "#ffd8a8", "line-opacity": 0.8, "line-width": ["interpolate", ["linear"], ["zoom"], 6, 10, 10, 8, 14, 4] } });
       map.addLayer({ id: "coverage-line", type: "line", source: "coverage",
-        paint: { "line-color": "#c92a2a", "line-width": 1.5 } });
+        paint: { "line-color": "#a61e1e", "line-width": ["interpolate", ["linear"], ["zoom"], 6, 3, 14, 2] } });
+      map.moveLayer("coverage-fill", "coverage-line");
+      map.addLayer({ id: "coverage-hover", type: "line", source: "coverage", filter: ["==", "source", ""],
+        paint: { "line-color": "#1c7ed6", "line-width": 5 } });
 
       const bounds = new maplibregl.LngLatBounds();
       const extend = (c) => (typeof c[0] === "number" ? bounds.extend(c) : c.forEach(extend));
       data.features.forEach((f) => extend(f.geometry.coordinates));
       if (!bounds.isEmpty()) map.fitBounds(bounds, { padding: 60, duration: 0 });
 
-      map.on("click", "coverage-fill", (e) => {
-        const rows = Object.entries(e.features[0].properties)
+      // Query a small box around the pointer so thin features are easy to hit.
+      const layers = ["coverage-fill", "coverage-halo"];
+      const hit = (point) => map.queryRenderedFeatures([[point.x - 6, point.y - 6], [point.x + 6, point.y + 6]], { layers });
+      map.on("click", (e) => {
+        const f = hit(e.point)[0];
+        if (!f) return;
+        const rows = Object.entries(f.properties)
           .map(([k, v]) => `<tr><td>${k}</td><td>${(formats[k] || String)(v)}</td></tr>`).join("");
         new maplibregl.Popup().setLngLat(e.lngLat).setHTML(`<table>${rows}</table>`).addTo(map);
       });
-      map.on("mouseenter", "coverage-fill", () => (map.getCanvas().style.cursor = "pointer"));
-      map.on("mouseleave", "coverage-fill", () => (map.getCanvas().style.cursor = ""));
+      map.on("mousemove", (e) => {
+        const f = hit(e.point)[0];
+        map.getCanvas().style.cursor = f ? "pointer" : "";
+        map.setFilter("coverage-hover", ["==", "source", f ? f.properties.source : ""]);
+      });
     });
   </script>
 </body>
