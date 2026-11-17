@@ -1,0 +1,297 @@
+{
+  "tilejson": "2.1.0",
+  "name": "RWS bathymetry",
+  "description": "Quantized-mesh terrain, heights above the WGS84/ETRS89 ellipsoid",
+  "version": "1.0.0",
+  "format": "quantized-mesh-1.0",
+  "attribution": "Rijkswaterstaat, Landelijke Opslag Lodingen (CC0)",
+  "scheme": "tms",
+  "projection": "EPSG:4326",
+  "tiles": [
+    "{z}/{x}/{y}.terrain"
+  ],
+  "minzoom": 0,
+  "maxzoom": 16,
+  "bounds": [
+    4.52,
+    52.455,
+    4.6,
+    52.485
+  ],
+  "available": [
+    [
+      {
+        "startX": 1,
+        "endX": 1,
+        "startY": 0,
+        "endY": 0
+      }
+    ],
+    [
+      {
+        "startX": 2,
+        "endX": 2,
+        "startY": 1,
+        "endY": 1
+      }
+    ],
+    [
+      {
+        "startX": 4,
+        "endX": 4,
+        "startY": 3,
+        "endY": 3
+      }
+    ],
+    [
+      {
+        "startX": 8,
+        "endX": 8,
+        "startY": 6,
+        "endY": 6
+      }
+    ],
+    [
+      {
+        "startX": 16,
+        "endX": 16,
+        "startY": 12,
+        "endY": 12
+      }
+    ],
+    [
+      {
+        "startX": 32,
+        "endX": 32,
+        "startY": 25,
+        "endY": 25
+      }
+    ],
+    [
+      {
+        "startX": 65,
+        "endX": 65,
+        "startY": 50,
+        "endY": 50
+      }
+    ],
+    [
+      {
+        "startX": 131,
+        "endX": 131,
+        "startY": 101,
+        "endY": 101
+      }
+    ],
+    [
+      {
+        "startX": 262,
+        "endX": 262,
+        "startY": 202,
+        "endY": 202
+      }
+    ],
+    [
+      {
+        "startX": 524,
+        "endX": 525,
+        "startY": 405,
+        "endY": 405
+      }
+    ],
+    [
+      {
+        "startX": 1049,
+        "endX": 1050,
+        "startY": 810,
+        "endY": 810
+      }
+    ],
+    [
+      {
+        "startX": 2099,
+        "endX": 2100,
+        "startY": 1620,
+        "endY": 1620
+      },
+      {
+        "startX": 2100,
+        "endX": 2100,
+        "startY": 1621,
+        "endY": 1621
+      }
+    ],
+    [
+      {
+        "startX": 4199,
+        "endX": 4200,
+        "startY": 3241,
+        "endY": 3241
+      },
+      {
+        "startX": 4200,
+        "endX": 4200,
+        "startY": 3242,
+        "endY": 3242
+      }
+    ],
+    [
+      {
+        "startX": 8398,
+        "endX": 8401,
+        "startY": 6483,
+        "endY": 6483
+      },
+      {
+        "startX": 8400,
+        "endX": 8401,
+        "startY": 6484,
+        "endY": 6484
+      }
+    ],
+    [
+      {
+        "startX": 16796,
+        "endX": 16797,
+        "startY": 12966,
+        "endY": 12966
+      },
+      {
+        "startX": 16799,
+        "endX": 16802,
+        "startY": 12966,
+        "endY": 12966
+      },
+      {
+        "startX": 16796,
+        "endX": 16802,
+        "startY": 12967,
+        "endY": 12967
+      },
+      {
+        "startX": 16801,
+        "endX": 16802,
+        "startY": 12968,
+        "endY": 12968
+      }
+    ],
+    [
+      {
+        "startX": 33593,
+        "endX": 33595,
+        "startY": 25933,
+        "endY": 25933
+      },
+      {
+        "startX": 33599,
+        "endX": 33599,
+        "startY": 25933,
+        "endY": 25933
+      },
+      {
+        "startX": 33601,
+        "endX": 33604,
+        "startY": 25933,
+        "endY": 25933
+      },
+      {
+        "startX": 33592,
+        "endX": 33605,
+        "startY": 25934,
+        "endY": 25934
+      },
+      {
+        "startX": 33593,
+        "endX": 33605,
+        "startY": 25935,
+        "endY": 25935
+      },
+      {
+        "startX": 33602,
+        "endX": 33605,
+        "startY": 25936,
+        "endY": 25936
+      }
+    ],
+    [
+      {
+        "startX": 67205,
+        "endX": 67205,
+        "startY": 51866,
+        "endY": 51866
+      },
+      {
+        "startX": 67186,
+        "endX": 67191,
+        "startY": 51867,
+        "endY": 51867
+      },
+      {
+        "startX": 67199,
+        "endX": 67199,
+        "startY": 51867,
+        "endY": 51867
+      },
+      {
+        "startX": 67203,
+        "endX": 67209,
+        "startY": 51867,
+        "endY": 51867
+      },
+      {
+        "startX": 67185,
+        "endX": 67197,
+        "startY": 51868,
+        "endY": 51868
+      },
+      {
+        "startX": 67199,
+        "endX": 67200,
+        "startY": 51868,
+        "endY": 51868
+      },
+      {
+        "startX": 67202,
+        "endX": 67208,
+        "startY": 51868,
+        "endY": 51868
+      },
+      {
+        "startX": 67185,
+        "endX": 67210,
+        "startY": 51869,
+        "endY": 51869
+      },
+      {
+        "startX": 67186,
+        "endX": 67210,
+        "startY": 51870,
+        "endY": 51870
+      },
+      {
+        "startX": 67186,
+        "endX": 67195,
+        "startY": 51871,
+        "endY": 51871
+      },
+      {
+        "startX": 67199,
+        "endX": 67210,
+        "startY": 51871,
+        "endY": 51871
+      },
+      {
+        "startX": 67204,
+        "endX": 67210,
+        "startY": 51872,
+        "endY": 51872
+      },
+      {
+        "startX": 67208,
+        "endX": 67210,
+        "startY": 51873,
+        "endY": 51873
+      }
+    ]
+  ]
+}

@@ -1,0 +1,44 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <title>RWS bathymetry – Cesium terrain demo</title>
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <script src="https://cesium.com/downloads/cesiumjs/releases/1.147/Build/Cesium/Cesium.js"></script>
+  <link href="https://cesium.com/downloads/cesiumjs/releases/1.147/Build/Cesium/Widgets/widgets.css" rel="stylesheet">
+  <link href="style.css" rel="stylesheet">
+</head>
+<body>
+  <div id="cesiumContainer"></div>
+  <div id="panel">
+    <h1>RWS bathymetry demo</h1>
+    <p class="small">IJmuiden harbour entrance. Rijkswaterstaat LOL 1 m data (CC0) + PDOK DTM.</p>
+
+    <fieldset>
+      <legend>Terrain</legend>
+      <label><input type="radio" name="mode" value="combined" checked> Combined (bathymetry + PDOK)</label>
+      <label><input type="radio" name="mode" value="pdok"> PDOK only</label>
+      <label><input type="radio" name="mode" value="bathy"> Bathymetry only</label>
+    </fieldset>
+
+    <fieldset>
+      <legend>Visualisation</legend>
+      <label><input type="checkbox" id="ramp" checked> Depth colour ramp</label>
+      <label><input type="checkbox" id="contours" checked> Contour lines</label>
+      <label>Interval <select id="spacing">
+        <option value="0.5">0.5 m</option>
+        <option value="1" selected>1 m</option>
+        <option value="2">2 m</option>
+        <option value="5">5 m</option>
+      </select></label>
+      <label>Imagery opacity <input type="range" id="alpha" min="0" max="1" step="0.05" value="0.6"></label>
+    </fieldset>
+
+    <div id="legend"></div>
+    <div id="info">Click the terrain to see the depth.</div>
+    <p class="small" id="status">Loading…</p>
+  </div>
+  <script src="composite-terrain.js"></script>
+  <script src="app.js"></script>
+</body>
+</html>

@@ -1,0 +1,10 @@
+[package]
+name = "bathy-terrarium"
+version.workspace = true
+edition.workspace = true
+license.workspace = true
+
+[dependencies]
+anyhow.workspace = true
+png = "0.17"
+serde_json.workspace = true

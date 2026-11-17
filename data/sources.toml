@@ -1,0 +1,18 @@
+
+[[source]]
+name = "ON_oost_NAP"
+path = "raw/ON_oost_NAP.tif"
+crs = "EPSG:7415"
+priority = 0
+
+[[source]]
+name = "WNN_n_NAP"
+path = "raw/WNN_n_NAP.tif"
+crs = "EPSG:7415"
+priority = 0
+
+[[source]]
+name = "ZN_west_NAP"
+path = "raw/ZN_west_NAP.tif"
+crs = "EPSG:7415"
+priority = 0

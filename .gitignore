@@ -1,0 +1,23 @@
+# Downloaded source data (GeoTIFFs, metadata, projections)
+data/raw/
+*.tif
+*.tiff
+*.tif.xml
+*.prj
+
+# Generated terrain tiles and intermediates
+data/tiles/
+data/work/
+output/
+tiles/
+*.terrain
+
+# Rust
+target/
+
+# Keep the small GitHub Pages demo (viewer + sample tiles) in the repository
+!docs/demo/
+!docs/demo/**
+
+# Node (viewer)
+node_modules/
