@@ -26,9 +26,20 @@ function toRD(latDeg, lonDeg) {
   return [x, y];
 }
 
+// Bathymetry extent (bounds from terrain/layer.json) as a local east/north box.
+const BATHY = [4.52, 52.455, 4.6, 52.485];
+const BATHY_CENTER = Cesium.Cartesian3.fromDegrees((BATHY[0] + BATHY[2]) / 2, (BATHY[1] + BATHY[3]) / 2, 0);
+const BATHY_ENU = Cesium.Transforms.eastNorthUpToFixedFrame(BATHY_CENTER);
+const BATHY_EAST = Cesium.Matrix4.getColumn(BATHY_ENU, 0, new Cesium.Cartesian4());
+const BATHY_NORTH = Cesium.Matrix4.getColumn(BATHY_ENU, 1, new Cesium.Cartesian4());
+const BATHY_EAST_V = new Cesium.Cartesian3(BATHY_EAST.x, BATHY_EAST.y, BATHY_EAST.z);
+const BATHY_NORTH_V = new Cesium.Cartesian3(BATHY_NORTH.x, BATHY_NORTH.y, BATHY_NORTH.z);
+const BATHY_HALF_EAST = Cesium.Math.toRadians((BATHY[2] - BATHY[0]) / 2) * 6378137 * Math.cos(Cesium.Math.toRadians((BATHY[1] + BATHY[3]) / 2));
+const BATHY_HALF_NORTH = Cesium.Math.toRadians((BATHY[3] - BATHY[1]) / 2) * 6335439;
+
 const globeMaterial = new Cesium.Material({
   fabric: {
-    uniforms: { offset: GEOID_OFFSET, spacing: 1.0, rampOn: 1.0, contourOn: 1.0,
+    uniforms: { bCenter: BATHY_CENTER, bEast: BATHY_EAST_V, bNorth: BATHY_NORTH_V, halfEast: BATHY_HALF_EAST, halfNorth: BATHY_HALF_NORTH, offset: GEOID_OFFSET, spacing: 1.0, rampOn: 1.0, contourOn: 1.0,
       c0: Cesium.Color.WHITE, c1: Cesium.Color.WHITE, c2: Cesium.Color.WHITE, c3: Cesium.Color.WHITE, c4: Cesium.Color.WHITE, c5: Cesium.Color.WHITE },
     source: `
       vec3 rampColor(float d) { // d = depth below NAP, metres
@@ -43,6 +54,9 @@ const globeMaterial = new Cesium.Material({
         float nap = materialInput.height - offset;
         float alpha = 0.0;
         vec3 color = vec3(0.0);
+        // Outside the bathymetry extent leave the basemap untouched.
+        vec3 d = (czm_inverseView * vec4(-materialInput.positionToEyeEC, 1.0)).xyz - bCenter;
+        if (abs(dot(d, bEast)) > halfEast || abs(dot(d, bNorth)) > halfNorth) { m.alpha = 0.0; return m; }
         if (nap < 0.0 && rampOn > 0.5) {
           color = rampColor(-nap);
           alpha = 0.85;
@@ -76,7 +90,18 @@ const globeMaterial = new Cesium.Material({
   viewer.scene.globe.depthTestAgainstTerrain = true;
   viewer.scene.globe.enableLighting = false;
   viewer.scene.globe.material = globeMaterial;
-  viewer.scene.globe.baseColor = Cesium.Color.fromCssColorString("#334");
+  viewer.scene.globe.baseColor = Cesium.Color.TRANSPARENT;
+
+  // Red marker for the bathymetry extent (bounds from terrain/layer.json).
+  viewer.entities.add({
+    polyline: {
+      positions: Cesium.Cartesian3.fromDegreesArray([
+        4.52, 52.455, 4.6, 52.455, 4.6, 52.485, 4.52, 52.485, 4.52, 52.455]),
+      width: 3,
+      material: Cesium.Color.RED,
+      clampToGround: true,
+    },
+  });
 
   const url = new URL("terrain/", location.href).toString();
   let pdok, bathy;
@@ -90,9 +115,12 @@ const globeMaterial = new Cesium.Material({
     return;
   }
   const combined = new CompositeTerrainProvider(pdok, bathy, { fallbackHeight: GEOID_OFFSET });
-  const providers = { combined, pdok, bathy };
+  // Bathymetry only: flat ellipsoid as base so tiles outside the survey area still render (masked in the shader).
+  const flat = new Cesium.EllipsoidTerrainProvider({ tilingScheme: pdok.tilingScheme });
+  const bathyOnly = new CompositeTerrainProvider(flat, bathy, { fallbackHeight: GEOID_OFFSET });
+  const providers = { combined, pdok, bathy: bathyOnly };
   const setMode = (m) => { viewer.scene.terrainProvider = providers[m]; };
-  setMode("combined");
+  setMode("bathy");
   status.textContent = "Heights are WGS84 ellipsoid heights; colours/contours are relative to NAP.";
 
   document.querySelectorAll("input[name=mode]").forEach((r) =>
